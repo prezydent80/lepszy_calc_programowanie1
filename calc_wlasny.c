@@ -121,17 +121,56 @@ double potega(double liczba, int wykladnik) {
 	return wynik;
 }
 
+void pusz_liczb(double stos_liczb[], int *top_liczb, double liczba){
+	stos_liczb[*top_liczb] = liczba;
+	(*top_liczb)++;
+}
+
+double pop_liczb(double stos_liczb[], int *top_liczb) {
+	(*top_liczb)--;
+	return stos_liczb[*top_liczb];
+}
+
+void pusz_znak(char stos_znak[], int* top_znak, int znak) {
+	stos_znak[*top_znak] = znak;
+	(*top_znak)++;
+}
+
+char pop_znak(char stos_znak[], int* top_znak) {
+	(*top_znak)--;
+	return stos_znak[*top_znak];
+}
+
+int piorytet(char znak) {
+	if (znak == '+' || znak == '-')
+		return 1;
+	if (znak == '*' || znak == '/')
+		return 2;
+	if (znak == '$' || znak == '^')
+		return 3;
+	return 0;
+}
+
 
 int main()
 {
 	char bufor[1024];
 	Token token[100];
+	Token ONP[100];
 
+	int ONP_index = 0;
 	int token_index = 0;
 	double liczbaA;
 	double liczbaB;
 	int dzialanie;
 	int i = 0;
+
+	double stos_liczb[100];
+	int top_liczb = 0;
+	char stos_znak[100];
+	int top_znak = 0;
+
+
 
 	read_from_stdin(bufor);
 
@@ -147,6 +186,8 @@ int main()
 			token[token_index].wartosc = text_to_num(bufor, i);
 
 			i = skip_num(bufor, i);
+
+
 			token_index++;
 		}
 		else if (bufor[i] == '+' || bufor[i] == '-' || bufor[i] == '*' || bufor[i] == '/' || bufor[i] == '$' || bufor[i] == '^') {
@@ -162,13 +203,63 @@ int main()
 	}
 
 	for (i = 0; i < token_index; i++) {
-		if (token[i].typ == 1) {
-			printf("Wartosc: %.20f\n", token[i].wartosc);
-		}
-		else if (token[i].typ == 2) {
-			printf("Dzialanie: %c\n", token[i].dzialanie);
+		if (token[i].typ == 2) {
+			while (top_znak > 0 && piorytet(stos_znak[top_znak - 1]) >= piorytet(token[i].dzialanie)) {
+				char zdjety_znak = pop_znak(stos_znak, &top_znak);
+				
+				ONP[ONP_index].typ = 2;
+				ONP[ONP_index].dzialanie = zdjety_znak;
+				ONP_index++;
+
+			}
+			pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
+		} else if (token[i].typ == 1) {
+			ONP[ONP_index] = token[i];
+			ONP_index++;
 		}
 	}
 
+	while (top_znak != 0) {
+		char zdjety_znak = pop_znak(stos_znak, &top_znak);
+		ONP[ONP_index].typ = 2;
+		ONP[ONP_index].dzialanie = zdjety_znak;
+		ONP_index++;
+	}
+
+	for (i = 0; i < ONP_index; i++) {
+		if (ONP[i].typ == 1) {
+			pusz_liczb(stos_liczb, &top_liczb, ONP[i].wartosc);
+		}
+		else if (ONP[i].typ == 2) {	
+			liczbaA = pop_liczb(stos_liczb, &top_liczb);
+			
+			if (ONP[i].dzialanie != '$') {
+				liczbaB = pop_liczb(stos_liczb, &top_liczb);
+			}
+
+
+			double wynik;
+			if (ONP[i].dzialanie == '+') {
+				wynik = liczbaB + liczbaA;
+			}
+			else if (ONP[i].dzialanie == '-') {
+				wynik = liczbaB - liczbaA;
+			}
+			else if (ONP[i].dzialanie == '*') {
+				wynik = liczbaB * liczbaA;
+			}
+			else if (ONP[i].dzialanie == '/') {
+				wynik = liczbaB / liczbaA;
+			}
+			else if (ONP[i].dzialanie == '$') {
+				wynik = sqrt(liczbaA);
+			}
+			else if (ONP[i].dzialanie == '^') {
+				wynik = potega(liczbaB, liczbaA);
+			}
+			pusz_liczb(stos_liczb, &top_liczb, wynik);
+		}
+	}
+	printf("%.4f\n", stos_liczb[0]);
 
 }
