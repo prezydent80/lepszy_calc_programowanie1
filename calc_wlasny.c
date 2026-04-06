@@ -142,12 +142,15 @@ char pop_znak(char stos_znak[], int* top_znak) {
 }
 
 int piorytet(char znak) {
+	if(znak == '(')
+		return 0;
 	if (znak == '+' || znak == '-')
 		return 1;
 	if (znak == '*' || znak == '/')
 		return 2;
 	if (znak == '$' || znak == '^')
 		return 3;
+
 	return 0;
 }
 
@@ -190,7 +193,7 @@ int main()
 
 			token_index++;
 		}
-		else if (bufor[i] == '+' || bufor[i] == '-' || bufor[i] == '*' || bufor[i] == '/' || bufor[i] == '$' || bufor[i] == '^') {
+		else if (bufor[i] == '+' || bufor[i] == '-' || bufor[i] == '*' || bufor[i] == '/' || bufor[i] == '$' || bufor[i] == '^' || bufor[i] == '(' || bufor[i] == ')') {
 			token[token_index].typ = 2;
 			token[token_index].dzialanie = bufor[i];
 
@@ -204,15 +207,31 @@ int main()
 
 	for (i = 0; i < token_index; i++) {
 		if (token[i].typ == 2) {
-			while (top_znak > 0 && piorytet(stos_znak[top_znak - 1]) >= piorytet(token[i].dzialanie)) {
-				char zdjety_znak = pop_znak(stos_znak, &top_znak);
-				
-				ONP[ONP_index].typ = 2;
-				ONP[ONP_index].dzialanie = zdjety_znak;
-				ONP_index++;
 
+			if (token[i].dzialanie == '(') {
+				pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
+			}else if (token[i].dzialanie == ')') {
+				while (stos_znak[top_znak - 1] != '(') {
+					char zdjety_znak = pop_znak(stos_znak, &top_znak);
+
+					ONP[ONP_index].typ = 2;
+					ONP[ONP_index].dzialanie = zdjety_znak;
+					ONP_index++;
+				}
+				char kosz = pop_znak(stos_znak, &top_znak);
 			}
-			pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
+			else {
+
+				while (top_znak > 0 && piorytet(stos_znak[top_znak - 1]) >= piorytet(token[i].dzialanie)) {
+					char zdjety_znak = pop_znak(stos_znak, &top_znak);
+
+					ONP[ONP_index].typ = 2;
+					ONP[ONP_index].dzialanie = zdjety_znak;
+					ONP_index++;
+
+				}
+				pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
+			}
 		} else if (token[i].typ == 1) {
 			ONP[ONP_index] = token[i];
 			ONP_index++;
