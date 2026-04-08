@@ -184,21 +184,22 @@ int main()
 			break;
 		}
 
-		if (czy_cyfra(bufor[i]) == 1) {
+		if (czy_cyfra(bufor[i]) == 1 ||( bufor[i] == '-' && (token_index == 0 || (token[token_index - 1].typ == 2 && token[token_index].dzialanie != ')')))) {
+
 			token[token_index].typ = 1;
 			token[token_index].wartosc = text_to_num(bufor, i);
 
 			i = skip_num(bufor, i);
-
-
 			token_index++;
 		}
-		else if (bufor[i] == '+' || bufor[i] == '-' || bufor[i] == '*' || bufor[i] == '/' || bufor[i] == '$' || bufor[i] == '^' || bufor[i] == '(' || bufor[i] == ')') {
+		else if (bufor[i] == '+' || bufor[i] == '*' || bufor[i] == '/' || bufor[i] == '$' || bufor[i] == '^' || bufor[i] == '(' || bufor[i] == ')') {
+			
+			
 			token[token_index].typ = 2;
 			token[token_index].dzialanie = bufor[i];
-
 			token_index++;
 			i++;
+			
 		}
 		else {
 			i++;
