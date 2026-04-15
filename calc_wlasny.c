@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <math.h>
+
 
 typedef struct {
 	int typ; // 1 - wartosc, 2 - dzialanie
@@ -34,7 +36,7 @@ double text_to_num(char bufor[], int i) {
 	if (bufor[i] == '.') {
 		i++;
 		double multiplier = 1;
-		while (czy_cyfra(bufor[i]) == 1){
+		while (czy_cyfra(bufor[i]) == 1) {
 			multiplier = multiplier / 10;
 			liczba = liczba + ((bufor[i] - '0') * multiplier);
 			i++;
@@ -66,34 +68,6 @@ int skip_num(char bufor[], int i) {
 	return i;
 }
 
-
-int znak_dzial(char bufor[], int i) {
-	if (bufor[i] == '+') {
-		i++;
-		return 1;
-	}
-	if (bufor[i] == '-') {
-		i++;
-		return 2;
-	}
-	if (bufor[i] == '*') {
-		i++;
-		return 3;
-	}
-	if (bufor[i] == '/') {
-		i++;
-		return 4;
-	}
-	if (bufor[i] == '$') {
-		i++;
-		return 5;
-	}
-	if (bufor[i] == '^') {
-		i++;
-		return 6;
-	}
-}
-
 double sqrt(double numb) {
 	if (numb < 0) {
 		return -1;
@@ -121,12 +95,12 @@ double potega(double liczba, int wykladnik) {
 	return wynik;
 }
 
-void pusz_liczb(double stos_liczb[], int *top_liczb, double liczba){
+void pusz_liczb(double stos_liczb[], int* top_liczb, double liczba) {
 	stos_liczb[*top_liczb] = liczba;
 	(*top_liczb)++;
 }
 
-double pop_liczb(double stos_liczb[], int *top_liczb) {
+double pop_liczb(double stos_liczb[], int* top_liczb) {
 	(*top_liczb)--;
 	return stos_liczb[*top_liczb];
 }
@@ -142,13 +116,13 @@ char pop_znak(char stos_znak[], int* top_znak) {
 }
 
 int piorytet(char znak) {
-	if(znak == '(')
+	if (znak == '(')
 		return 0;
 	if (znak == '+' || znak == '-')
 		return 1;
 	if (znak == '*' || znak == '/')
 		return 2;
-	if (znak == '$' || znak == '^')
+	if (znak == '$' || znak == '^' || znak == 's' || znak == 'c' || znak == 't')
 		return 3;
 
 	return 0;
@@ -184,7 +158,7 @@ int main()
 			break;
 		}
 
-		if (czy_cyfra(bufor[i]) == 1 ||( bufor[i] == '-' && (token_index == 0 || (token[token_index - 1].typ == 2 && token[token_index].dzialanie != ')')))) {
+		if (czy_cyfra(bufor[i]) == 1 || (bufor[i] == '-' && (token_index == 0 || (token[token_index - 1].typ == 2 && token[token_index - 1].dzialanie != ')')))) {
 
 			token[token_index].typ = 1;
 			token[token_index].wartosc = text_to_num(bufor, i);
@@ -192,17 +166,32 @@ int main()
 			i = skip_num(bufor, i);
 			token_index++;
 		}
-		else if (bufor[i] == '+' || bufor[i] == '*' || bufor[i] == '/' || bufor[i] == '$' || bufor[i] == '^' || bufor[i] == '(' || bufor[i] == ')') {
-			
-			
+		else if (bufor[i] == '+' || bufor[i] == '-' || bufor[i] == '*' || bufor[i] == '/' || bufor[i] == '$' || bufor[i] == '^' || bufor[i] == '(' || bufor[i] == ')') {
+
+
 			token[token_index].typ = 2;
 			token[token_index].dzialanie = bufor[i];
 			token_index++;
 			i++;
-			
+
 		}
-		else {
-			i++;
+		else if(bufor[i] == 's' && bufor[1+i] == 'i' && bufor[2+i] == 'n') { //rozpoznawanie sinusa
+			token[token_index].typ = 2;
+			token[token_index].dzialanie = 's';
+			token_index++;
+			i = i + 3;
+		}
+		else if (bufor[i] == 'c' && bufor[1 + i] == 'o' && bufor[2 + i] == 's') { //rozpoznawianie cosinusa
+			token[token_index].typ = 2;
+			token[token_index].dzialanie = 'c';
+			token_index++;
+			i = i + 3;
+		}
+		else if (bufor[i] == 't' && bufor[1 + i] == 'g') { // rozpoznawanie tangensa
+			token[token_index].typ = 2;
+			token[token_index].dzialanie = 't';
+			token_index++;
+			i = i + 2;
 		}
 	}
 
@@ -211,7 +200,8 @@ int main()
 
 			if (token[i].dzialanie == '(') {
 				pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
-			}else if (token[i].dzialanie == ')') {
+			}
+			else if (token[i].dzialanie == ')') {
 				while (stos_znak[top_znak - 1] != '(') {
 					char zdjety_znak = pop_znak(stos_znak, &top_znak);
 
@@ -233,7 +223,8 @@ int main()
 				}
 				pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
 			}
-		} else if (token[i].typ == 1) {
+		}
+		else if (token[i].typ == 1) {
 			ONP[ONP_index] = token[i];
 			ONP_index++;
 		}
@@ -250,10 +241,10 @@ int main()
 		if (ONP[i].typ == 1) {
 			pusz_liczb(stos_liczb, &top_liczb, ONP[i].wartosc);
 		}
-		else if (ONP[i].typ == 2) {	
+		else if (ONP[i].typ == 2) {
 			liczbaA = pop_liczb(stos_liczb, &top_liczb);
-			
-			if (ONP[i].dzialanie != '$') {
+
+			if (ONP[i].dzialanie != '$' || ONP[i].dzialanie != '$' || ONP[i].dzialanie != '$') {
 				liczbaB = pop_liczb(stos_liczb, &top_liczb);
 			}
 
@@ -276,6 +267,9 @@ int main()
 			}
 			else if (ONP[i].dzialanie == '^') {
 				wynik = potega(liczbaB, liczbaA);
+			}
+			else if (ONP[i].dzialanie == 's') {
+				wynik = sin(liczbaA);
 			}
 			pusz_liczb(stos_liczb, &top_liczb, wynik);
 		}
