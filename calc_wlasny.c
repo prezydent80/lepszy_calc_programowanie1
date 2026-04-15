@@ -68,7 +68,7 @@ int skip_num(char bufor[], int i) {
 	return i;
 }
 
-double sqrt(double numb) {
+double pierwiatek(double numb) {
 	if (numb < 0) {
 		return -1;
 	}
@@ -134,146 +134,187 @@ int main()
 	char bufor[1024];
 	Token token[100];
 	Token ONP[100];
-
-	int ONP_index = 0;
-	int token_index = 0;
+	double stos_liczb[100];
+	char stos_znak[100];
 	double liczbaA;
 	double liczbaB;
-	int dzialanie;
-	int i = 0;
 
-	double stos_liczb[100];
-	int top_liczb = 0;
-	char stos_znak[100];
-	int top_znak = 0;
+	while (1)
+	{
 
 
+		int ONP_index = 0;
+		int token_index = 0;
+		int i = 0;
 
-	read_from_stdin(bufor);
+		int top_liczb = 0;
+		int top_znak = 0;
 
-	while (bufor[i] != 0) {
-		i = del_spaces(bufor, i);
 
-		if (bufor[i] == 0) {
+		printf("kalkuluj, albo kliknij q zeby wyjsc \n");
+
+		read_from_stdin(bufor);
+
+		if (bufor[0] == 'q' && (bufor[1] == '\n' || bufor[1] == ' ' || bufor[1] == 0)) {
+			printf("zamykam sie");
 			break;
 		}
 
-		if (czy_cyfra(bufor[i]) == 1 || (bufor[i] == '-' && (token_index == 0 || (token[token_index - 1].typ == 2 && token[token_index - 1].dzialanie != ')')))) {
+		while (bufor[i] != 0) {
+			i = del_spaces(bufor, i);
 
-			token[token_index].typ = 1;
-			token[token_index].wartosc = text_to_num(bufor, i);
-
-			i = skip_num(bufor, i);
-			token_index++;
-		}
-		else if (bufor[i] == '+' || bufor[i] == '-' || bufor[i] == '*' || bufor[i] == '/' || bufor[i] == '$' || bufor[i] == '^' || bufor[i] == '(' || bufor[i] == ')') {
-
-
-			token[token_index].typ = 2;
-			token[token_index].dzialanie = bufor[i];
-			token_index++;
-			i++;
-
-		}
-		else if(bufor[i] == 's' && bufor[1+i] == 'i' && bufor[2+i] == 'n') { //rozpoznawanie sinusa
-			token[token_index].typ = 2;
-			token[token_index].dzialanie = 's';
-			token_index++;
-			i = i + 3;
-		}
-		else if (bufor[i] == 'c' && bufor[1 + i] == 'o' && bufor[2 + i] == 's') { //rozpoznawianie cosinusa
-			token[token_index].typ = 2;
-			token[token_index].dzialanie = 'c';
-			token_index++;
-			i = i + 3;
-		}
-		else if (bufor[i] == 't' && bufor[1 + i] == 'g') { // rozpoznawanie tangensa
-			token[token_index].typ = 2;
-			token[token_index].dzialanie = 't';
-			token_index++;
-			i = i + 2;
-		}
-	}
-
-	for (i = 0; i < token_index; i++) {
-		if (token[i].typ == 2) {
-
-			if (token[i].dzialanie == '(') {
-				pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
+			if (bufor[i] == 0) {
+				break;
 			}
-			else if (token[i].dzialanie == ')') {
-				while (stos_znak[top_znak - 1] != '(') {
-					char zdjety_znak = pop_znak(stos_znak, &top_znak);
 
-					ONP[ONP_index].typ = 2;
-					ONP[ONP_index].dzialanie = zdjety_znak;
-					ONP_index++;
-				}
-				char kosz = pop_znak(stos_znak, &top_znak);
+			if (czy_cyfra(bufor[i]) == 1 || (bufor[i] == '-' && (token_index == 0 || (token[token_index - 1].typ == 2 && token[token_index - 1].dzialanie != ')')))) {
+
+				token[token_index].typ = 1;
+				token[token_index].wartosc = text_to_num(bufor, i);
+
+				i = skip_num(bufor, i);
+				token_index++;
+			}
+			else if (bufor[i] == '+' || bufor[i] == '-' || bufor[i] == '*' || bufor[i] == '/' || bufor[i] == '$' || bufor[i] == '^' || bufor[i] == '(' || bufor[i] == ')') {
+
+
+				token[token_index].typ = 2;
+				token[token_index].dzialanie = bufor[i];
+				token_index++;
+				i++;
+
+			}
+			else if (bufor[i] == 's' && bufor[1 + i] == 'i' && bufor[2 + i] == 'n') { //rozpoznawanie sinusa
+				token[token_index].typ = 2;
+				token[token_index].dzialanie = 's';
+				token_index++;
+				i = i + 3;
+			}
+			else if (bufor[i] == 'c' && bufor[1 + i] == 'o' && bufor[2 + i] == 's') { //rozpoznawianie cosinusa
+				token[token_index].typ = 2;
+				token[token_index].dzialanie = 'c';
+				token_index++;
+				i = i + 3;
+			}
+			else if (bufor[i] == 't' && bufor[1 + i] == 'g') { // rozpoznawanie tangensa
+				token[token_index].typ = 2;
+				token[token_index].dzialanie = 't';
+				token_index++;
+				i = i + 2;
+			}
+			else if (bufor[i] == 'l' && bufor[1 + i] == 'n') {
+				token[token_index].typ = 2;
+				token[token_index].dzialanie = 'l';
+				token_index++;
+				i = i + 2;
+			}
+			else if (bufor[i] == 'e') {
+				token[token_index].typ = 1;
+				token[token_index].wartosc = 2.7183;
+				token_index++;
+				i++;
+			}
+			else if (bufor[i] == 'p' && bufor[1 + i] == 'i') {
+				token[token_index].typ = 1;
+				token[token_index].wartosc = 3.1416;
+				token_index++;
+				i = i + 2;
 			}
 			else {
-
-				while (top_znak > 0 && piorytet(stos_znak[top_znak - 1]) >= piorytet(token[i].dzialanie)) {
-					char zdjety_znak = pop_znak(stos_znak, &top_znak);
-
-					ONP[ONP_index].typ = 2;
-					ONP[ONP_index].dzialanie = zdjety_znak;
-					ONP_index++;
-
-				}
-				pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
+				i++;
 			}
 		}
-		else if (token[i].typ == 1) {
-			ONP[ONP_index] = token[i];
+
+		for (i = 0; i < token_index; i++) {
+			if (token[i].typ == 2) {
+
+				if (token[i].dzialanie == '(') {
+					pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
+				}
+				else if (token[i].dzialanie == ')') {
+					while (stos_znak[top_znak - 1] != '(') {
+						char zdjety_znak = pop_znak(stos_znak, &top_znak);
+
+						ONP[ONP_index].typ = 2;
+						ONP[ONP_index].dzialanie = zdjety_znak;
+						ONP_index++;
+					}
+					char kosz = pop_znak(stos_znak, &top_znak);
+				}
+				else {
+
+					while (top_znak > 0 && piorytet(stos_znak[top_znak - 1]) >= piorytet(token[i].dzialanie)) {
+						char zdjety_znak = pop_znak(stos_znak, &top_znak);
+
+						ONP[ONP_index].typ = 2;
+						ONP[ONP_index].dzialanie = zdjety_znak;
+						ONP_index++;
+
+					}
+					pusz_znak(stos_znak, &top_znak, token[i].dzialanie);
+				}
+			}
+			else if (token[i].typ == 1) {
+				ONP[ONP_index] = token[i];
+				ONP_index++;
+			}
+		}
+
+		while (top_znak != 0) {
+			char zdjety_znak = pop_znak(stos_znak, &top_znak);
+			ONP[ONP_index].typ = 2;
+			ONP[ONP_index].dzialanie = zdjety_znak;
 			ONP_index++;
 		}
-	}
 
-	while (top_znak != 0) {
-		char zdjety_znak = pop_znak(stos_znak, &top_znak);
-		ONP[ONP_index].typ = 2;
-		ONP[ONP_index].dzialanie = zdjety_znak;
-		ONP_index++;
-	}
+		for (i = 0; i < ONP_index; i++) {
+			if (ONP[i].typ == 1) {
+				pusz_liczb(stos_liczb, &top_liczb, ONP[i].wartosc);
+			}
+			else if (ONP[i].typ == 2) {
+				liczbaA = pop_liczb(stos_liczb, &top_liczb);
 
-	for (i = 0; i < ONP_index; i++) {
-		if (ONP[i].typ == 1) {
-			pusz_liczb(stos_liczb, &top_liczb, ONP[i].wartosc);
+				if (ONP[i].dzialanie != '$' && ONP[i].dzialanie != 's' && ONP[i].dzialanie != 'c' && ONP[i].dzialanie != 't' && ONP[i].dzialanie != 'l') {
+					liczbaB = pop_liczb(stos_liczb, &top_liczb);
+				}
+
+
+				double wynik;
+				if (ONP[i].dzialanie == '+') {
+					wynik = liczbaB + liczbaA;
+				}
+				else if (ONP[i].dzialanie == '-') {
+					wynik = liczbaB - liczbaA;
+				}
+				else if (ONP[i].dzialanie == '*') {
+					wynik = liczbaB * liczbaA;
+				}
+				else if (ONP[i].dzialanie == '/') {
+					wynik = liczbaB / liczbaA;
+				}
+				else if (ONP[i].dzialanie == '$') {
+					wynik = pierwiatek(liczbaA);
+				}
+				else if (ONP[i].dzialanie == '^') {
+					wynik = potega(liczbaB, liczbaA);
+				}
+				else if (ONP[i].dzialanie == 's') {
+					wynik = sin(liczbaA * (3.14159265358979323846 / 180.0));
+				}
+				else if (ONP[i].dzialanie == 'c') {
+					wynik = cos(liczbaA * (3.14159265358979323846 / 180.0));
+				}
+				else if (ONP[i].dzialanie == 't') {
+					wynik = tan(liczbaA * (3.14159265358979323846 / 180.0));
+				}
+				else if (ONP[i].dzialanie == 'l') {
+					wynik = log(liczbaA);
+				}
+				pusz_liczb(stos_liczb, &top_liczb, wynik);
+			}
 		}
-		else if (ONP[i].typ == 2) {
-			liczbaA = pop_liczb(stos_liczb, &top_liczb);
+		printf("%.4f\n", stos_liczb[0]);
 
-			if (ONP[i].dzialanie != '$' || ONP[i].dzialanie != '$' || ONP[i].dzialanie != '$') {
-				liczbaB = pop_liczb(stos_liczb, &top_liczb);
-			}
-
-
-			double wynik;
-			if (ONP[i].dzialanie == '+') {
-				wynik = liczbaB + liczbaA;
-			}
-			else if (ONP[i].dzialanie == '-') {
-				wynik = liczbaB - liczbaA;
-			}
-			else if (ONP[i].dzialanie == '*') {
-				wynik = liczbaB * liczbaA;
-			}
-			else if (ONP[i].dzialanie == '/') {
-				wynik = liczbaB / liczbaA;
-			}
-			else if (ONP[i].dzialanie == '$') {
-				wynik = sqrt(liczbaA);
-			}
-			else if (ONP[i].dzialanie == '^') {
-				wynik = potega(liczbaB, liczbaA);
-			}
-			else if (ONP[i].dzialanie == 's') {
-				wynik = sin(liczbaA);
-			}
-			pusz_liczb(stos_liczb, &top_liczb, wynik);
-		}
 	}
-	printf("%.4f\n", stos_liczb[0]);
 
 }
